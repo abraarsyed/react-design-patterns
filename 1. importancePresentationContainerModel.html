@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Importance of Presentation Container Model</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script type="text/babel">
+    class TableComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          data: []
+        };
+        this.styles = {
+          cellBorder: {
+            border: '1px solid black'
+          }
+        };
+      }
+
+      componentDidMount() {
+        // Assume that below data is received from some service call
+        let data = [
+          {
+            'Index': 1,
+            'Title': 'Title 1',
+            'Description': 'This is Description 1'
+          },
+          {
+            'Index': 2,
+            'Title': 'Title 2',
+            'Description': 'This is Description 2'
+          },
+          {
+            'Index': 3,
+            'Title': 'Title 3',
+            'Description': 'This is Description 3'
+          }
+        ];
+        this.setState({data: data});
+      }
+
+      fetchRowContents(row, rowHeadings) {
+        return rowHeadings.map((rowHeading) => {
+          return (
+            <td style={this.styles.cellBorder}>
+              {row[rowHeading]}
+            </td>
+          );
+        });
+      }
+
+      render() {
+        if (this.state.data.length === 0) {
+          return (<div>No Data to Display!</div>);
+        }
+        let columnHeadings = Object.keys(this.state.data[0]);
+        let columnHeadingHtml = columnHeadings.map((columnHeading) => {
+          return (
+            <th style={this.styles.cellBorder}>
+              {columnHeading}
+            </th>
+          );
+        });
+        let rowHtml = this.state.data.map((rowData) => {
+          return (
+            <tr>
+              {this.fetchRowContents(rowData, columnHeadings)}
+            </tr>
+          );
+        });
+        return (
+          <table style={this.styles.cellBorder}>
+            <tr>
+              {columnHeadingHtml}
+            </tr>
+            {rowHtml}
+          </table>
+        );
+      }
+    };
+    ReactDOM.render(<TableComponent />, document.getElementById('container'));
+  </script>
+</body>
+
+</html>
