@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>States in Container Component</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script type="text/babel">
+    class TableComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.styles = {
+          cellBorder: {
+            border: '1px solid black'
+          }
+        };
+      }
+
+      fetchRowContents(row, rowHeadings) {
+        return rowHeadings.map((rowHeading) => {
+          return (
+            <td style={this.styles.cellBorder}>
+              {row[rowHeading]}
+            </td>
+          );
+        });
+      }
+
+      render() {
+        if (this.props.data.length === 0) {
+          return (<div>No Data to Display!</div>);
+        }
+        let columnHeadings = Object.keys(this.props.data[0]);
+        let columnHeadingHtml = columnHeadings.map((columnHeading) => {
+          return (
+            <th style={this.styles.cellBorder}>
+              {columnHeading}
+            </th>
+          );
+        });
+        let rowHtml = this.props.data.map((rowData) => {
+          return (
+            <tr>
+              {this.fetchRowContents(rowData, columnHeadings)}
+            </tr>
+          );
+        });
+        return (
+          <table style={this.styles.cellBorder}>
+            <tr>
+              {columnHeadingHtml}
+            </tr>
+            {rowHtml}
+          </table>
+        );
+      }
+    };
+
+    class SearchBoxComponent extends React.Component {
+      render() {
+        return (
+          <div>
+            Search:
+            <input type="text"
+              value={this.props.searchText}
+              onChange={this.props.updateParent}>
+            </input>
+          </div>
+        );
+      }
+    };
+
+    class ContainerComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          data: [],
+          originalData: [],
+          searchText: ''
+        };
+        this.updateParent = this.updateParent.bind(this);
+      }
+
+      componentDidMount() {
+        // Assume that below data is received from some service call
+        let data = [
+          {
+            'User ID': 510,
+            'Name': 'Gautham Pai',
+            'Country': 'India'
+          },
+          {
+            'User ID': 511,
+            'Name': 'Raj Sharma',
+            'Country': 'Australia'
+          },
+          {
+            'User ID': 112,
+            'Name': 'John Smith',
+            'Country': 'Germany'
+          }
+        ];
+        this.setState({
+          data: data,
+          originalData: data
+        });
+      }
+
+      updateParent(event) {
+        let data = [];
+        this.state.originalData.map((record) => {
+          data.push(Object.assign({}, record));
+        });
+        let searchText = event.target.value.toLowerCase();
+        data = data.filter((record) => {
+          return record.Name.toLowerCase().search(searchText) !== -1 ||
+            record.Country.toLowerCase().search(searchText) !== -1;
+        });
+        this.setState({
+          data: data,
+          searchText: event.target.value
+        });
+      }
+
+      render() {
+        return (
+          <div>
+            <SearchBoxComponent
+              searchText={this.state.searchText}
+              updateParent={this.updateParent} />
+            <TableComponent data={this.state.data} />
+          </div>
+        );
+      }
+    };
+
+    ReactDOM.render(<ContainerComponent />, document.getElementById('container'));
+  </script>
+</body>
+
+</html>
